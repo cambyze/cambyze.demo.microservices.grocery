@@ -11,6 +11,8 @@
   <groupId>com.cambyze.training.springboot.microservice.h2</groupId>
   <artifactId>grocery</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <!-- To generate a war instead of a jar -->
+  <!-- <packaging>war</packaging> -->
   <name>grocery</name>
   <description>Training project for Spring Boot server with microservices using H2 db</description>
 
@@ -26,9 +28,9 @@
 
     <!-- REST API documentation -->
     <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-boot-starter</artifactId>
-        <version>3.0.0</version>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-boot-starter</artifactId>
+      <version>3.0.0</version>
     </dependency>
 
     <dependency>
