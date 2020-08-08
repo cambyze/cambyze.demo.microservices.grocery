@@ -1,2 +1,2 @@
-# webserver-OAuth2-mongoDB-demowar
-Demo project for Spring Boot server OAuth2 with MongoDB (war mode)
+# training.springboot.microservice.h2
+Training project for Spring Boot server with microservices using H2 db
