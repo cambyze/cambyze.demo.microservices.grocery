@@ -22,6 +22,10 @@ public class Product {
   private double price;
 
   @Min(value = 0)
+  @Max(value = 100000)
+  private double purchasePrice;
+
+  @Min(value = 0)
   @Max(value = 10000000)
   private int available;
 
@@ -29,11 +33,12 @@ public class Product {
     super();
   }
 
-  public Product(long id, String name, double price, int available) {
+  public Product(long id, String name, double price, double purchasePrice, int available) {
     super();
     this.id = id;
     this.name = name;
     this.price = price;
+    this.purchasePrice = purchasePrice;
     this.available = available;
   }
 
@@ -61,6 +66,14 @@ public class Product {
     this.price = price;
   }
 
+  public double getPurchasePrice() {
+    return purchasePrice;
+  }
+
+  public void setPurchasePrice(double purchasePrice) {
+    this.purchasePrice = purchasePrice;
+  }
+
   public int getAvailable() {
     return available;
   }
@@ -69,9 +82,10 @@ public class Product {
     this.available = available;
   }
 
+
   @Override
   public String toString() {
-    return "Product{id=" + id + ",name=" + name + ",price=" + price + ",quantity available="
-        + available + "}";
+    return "Product{id=" + id + ",name=" + name + ",price=" + price + ", purchase price="
+        + purchasePrice + ",quantity available=" + available + "}";
   }
 }

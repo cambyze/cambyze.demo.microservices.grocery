@@ -1,6 +1,7 @@
 package com.cambyze.training.springboot.microservice.h2.grocery.web.controller;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,53 @@ public class ProductController {
   @Autowired
   private ProductDao productDao;
 
+  private class ProductMargin {
+    private Product product;
+    private double unitaryMargin;
+    private double potentialMargin;
+
+    public ProductMargin() {
+      super();
+    }
+
+
+    public ProductMargin(Product product, double unitaryMargin, double potentialMargin) {
+      super();
+      this.product = product;
+      this.unitaryMargin = unitaryMargin;
+      this.potentialMargin = potentialMargin;
+    }
+
+
+
+    public Product getProduct() {
+      return product;
+    }
+
+    public void setProduct(Product product) {
+      this.product = product;
+    }
+
+    public double getUnitaryMargin() {
+      return unitaryMargin;
+    }
+
+    public void setUnitaryMargin(double unitaryMargin) {
+      this.unitaryMargin = unitaryMargin;
+    }
+
+    public double getPotentialMargin() {
+      return potentialMargin;
+    }
+
+    public void setPotentialMargin(double potentialMargin) {
+      this.potentialMargin = potentialMargin;
+    }
+
+
+  }
+
+
   /*
    * Get product by id
    */
@@ -54,6 +102,25 @@ public class ProductController {
     List<Product> products = productDao.findByAvailableGreaterThan(quantityMin);
     return products;
   }
+
+
+
+  /*
+   * Calculate margin per product
+   */
+  @ApiOperation(value = "Calculate margin per product")
+  @GetMapping(value = "/products/margins")
+  public List<ProductMargin> getProductsMargins() {
+    List<ProductMargin> productsMargins = new ArrayList<ProductMargin>();
+    List<Product> products = productDao.findAll();
+    for (Product product : products) {
+      productsMargins
+          .add(new ProductMargin(product, product.getPrice() - product.getPurchasePrice(),
+              (product.getPrice() - product.getPurchasePrice()) * product.getAvailable()));
+    }
+    return productsMargins;
+  }
+
 
   @ApiOperation(value = "Create a new product in the inventory")
   @PostMapping(value = "/products")
