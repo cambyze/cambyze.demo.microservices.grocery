@@ -3,6 +3,9 @@ package com.cambyze.training.springboot.microservice.h2.grocery.model;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import org.hibernate.validator.constraints.Length;
 
 @Entity
 public class Product {
@@ -11,8 +14,15 @@ public class Product {
   @GeneratedValue
   private long id;
 
+  @Length(min = 3, max = 255)
   private String name;
+
+  @Min(value = 0)
+  @Max(value = 100000)
   private double price;
+
+  @Min(value = 0)
+  @Max(value = 10000000)
   private int available;
 
   public Product() {

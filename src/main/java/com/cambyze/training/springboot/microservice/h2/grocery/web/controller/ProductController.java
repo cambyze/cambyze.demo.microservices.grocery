@@ -2,6 +2,7 @@ package com.cambyze.training.springboot.microservice.h2.grocery.web.controller;
 
 import java.net.URI;
 import java.util.List;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,7 +42,7 @@ public class ProductController {
   }
 
   @PostMapping(value = "/products")
-  public ResponseEntity<Object> createProduct(@RequestBody Product product) {
+  public ResponseEntity<Object> createProduct(@Valid @RequestBody Product product) {
     Product newProduct = productDao.save(product);
     if (newProduct == null) {
       return ResponseEntity.noContent().build();
