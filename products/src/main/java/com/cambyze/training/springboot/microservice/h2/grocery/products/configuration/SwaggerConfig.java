@@ -20,7 +20,7 @@ public class SwaggerConfig {
 
   private Contact contact = new Contact("", "", "");
   private List<VendorExtension> vendorExtensions = new ArrayList<VendorExtension>();
-  private ApiInfo apiInfo = new ApiInfo("Grocery management API",
+  private ApiInfo apiInfo = new ApiInfo("Grocery products management API",
       "API to manage grocery products inventory", "1.0", "", contact, "", "", vendorExtensions);
   private Tag ProductControllerTag = new Tag("ProductController", "Product resource");
 
