@@ -1,0 +1,1 @@
+INSERT INTO purchase_order(id, product_Reference, order_Date, quantity, paid) VALUES (10, 100 , sysdate, 3, false);

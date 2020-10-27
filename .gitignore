@@ -31,3 +31,24 @@ build/
 
 ### VS Code ###
 .vscode/
+/orders/.mvn/wrapper/MavenWrapperDownloader.java
+/orders/.mvn/wrapper/maven-wrapper.jar
+/orders/.mvn/wrapper/maven-wrapper.properties
+/mvnw
+/mvnw.cmd
+/orders/mvnw
+/orders/mvnw.cmd
+/portal/.mvn/wrapper/MavenWrapperDownloader.java
+/portal/.mvn/wrapper/maven-wrapper.jar
+/portal/.mvn/wrapper/maven-wrapper.properties
+/portal/.mvn/wrapper/maven-wrapper.jar
+/products/mvnw
+/products/mvnw.cmd
+/products/.mvn/wrapper/MavenWrapperDownloader.java
+/products/.mvn/wrapper/maven-wrapper.jar
+/products/.mvn/wrapper/maven-wrapper.properties
+/portal/.mvn/wrapper/maven-wrapper.jar
+/portal/.mvn/wrapper/maven-wrapper.jar
+/portal/.mvn/wrapper
+/portal/mvnw
+/portal/mvnw.cmd
