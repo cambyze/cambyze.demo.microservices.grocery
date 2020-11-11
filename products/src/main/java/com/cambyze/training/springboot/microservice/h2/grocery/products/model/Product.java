@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import org.hibernate.validator.constraints.Length;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Product {
@@ -26,6 +27,7 @@ public class Product {
 
   @Min(value = 0)
   @Max(value = 100000)
+  @JsonIgnore
   private double purchasePrice;
 
   @Min(value = 0)

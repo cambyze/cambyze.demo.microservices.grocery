@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -31,15 +32,43 @@ public class ProductController {
   @Autowired
   private ProductDao productDao;
 
-  private class ProductMargin {
+  public class ProductMargin {
     private Product product;
     private double unitaryMargin;
     private double potentialMargin;
+
+    public ProductMargin() {
+      super();
+    }
 
     public ProductMargin(Product product, double unitaryMargin, double potentialMargin) {
       super();
       this.product = product;
       this.unitaryMargin = unitaryMargin;
+      this.potentialMargin = potentialMargin;
+    }
+
+    public Product getProduct() {
+      return product;
+    }
+
+    public void setProduct(Product product) {
+      this.product = product;
+    }
+
+    public double getUnitaryMargin() {
+      return unitaryMargin;
+    }
+
+    public void setUnitaryMargin(double unitaryMargin) {
+      this.unitaryMargin = unitaryMargin;
+    }
+
+    public double getPotentialMargin() {
+      return potentialMargin;
+    }
+
+    public void setPotentialMargin(double potentialMargin) {
       this.potentialMargin = potentialMargin;
     }
   }
@@ -111,5 +140,11 @@ public class ProductController {
     productDao.deleteById(id);
   }
 
+  @ApiOperation(value = "Modify a product of the inventory")
+  @PutMapping(value = "/products/{id}")
+  public void updateProduit(@RequestBody Product product, @PathVariable long id) {
+    product.setId(id);
+    productDao.save(product);
+  }
 
 }
