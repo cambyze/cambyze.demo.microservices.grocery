@@ -4,6 +4,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
@@ -11,12 +13,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
+import com.cambyze.commons.MathTools;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(indexes = {@Index(columnList = "code", name = "indProductCode", unique = true)})
 public class Product {
 
+  private static final int NBDECIMALS = 2;
 
   @Id
   @SequenceGenerator(name = "productSequence", initialValue = 200, allocationSize = 10)
@@ -45,6 +49,40 @@ public class Product {
   @Min(value = 0)
   @Max(value = 10000000)
   private Integer available;
+
+
+  /*
+   * Format code a upper case String
+   */
+  private void formatProductCode() {
+    if (this.code != null) {
+      this.code = this.code.toUpperCase();
+    }
+  }
+
+  /*
+   * Format received numbers as amounts
+   */
+  private void formatProductAmounts() {
+    if (this.price != null) {
+      this.price = MathTools.roundWithDecimals(this.price, NBDECIMALS);
+    }
+    if (this.purchasePrice != null) {
+      this.purchasePrice = MathTools.roundWithDecimals(this.purchasePrice, NBDECIMALS);
+    }
+  }
+
+
+  @PrePersist
+  private void prePersist() {
+    formatProductCode();
+    formatProductAmounts();
+  }
+
+  @PreUpdate
+  private void preUpate() {
+    formatProductAmounts();
+  }
 
 
   public long getId() {
