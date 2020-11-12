@@ -26,7 +26,12 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!-- REST API documentation -->
+    <dependency>
+      <groupId>com.cambyze.commons</groupId>
+      <artifactId>commons-tools</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    
     <dependency>
       <groupId>io.springfox</groupId>
       <artifactId>springfox-boot-starter</artifactId>

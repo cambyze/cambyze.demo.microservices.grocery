@@ -3,104 +3,138 @@ package com.cambyze.training.springboot.microservice.h2.grocery.products.model;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.URL;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
+@Table(indexes = {@Index(columnList = "code", name = "indProductCode", unique = true)})
 public class Product {
 
+
   @Id
-  @GeneratedValue
+  @SequenceGenerator(name = "productSequence", initialValue = 200, allocationSize = 10)
+  @GeneratedValue(generator = "productSequence")
+  @JsonIgnore
   private long id;
+
+  @NotBlank
+  @Length(min = 5, max = 50)
+  private String code;
 
   @Length(min = 3, max = 255)
   private String name;
 
-  @Length(min = 3, max = 4000)
-  private String image;
+  @URL
+  private String imageURL;
 
   @Min(value = 0)
   @Max(value = 100000)
-  private double price;
+  private Double price;
 
   @Min(value = 0)
   @Max(value = 100000)
-  @JsonIgnore
-  private double purchasePrice;
+  private Double purchasePrice;
 
   @Min(value = 0)
   @Max(value = 10000000)
-  private int available;
+  private Integer available;
 
-  public Product() {
-    super();
-  }
-
-  public Product(long id, @Length(min = 3, max = 255) String name,
-      @Length(min = 3, max = 4000) String image, @Min(0) @Max(100000) double price,
-      @Min(0) @Max(100000) double purchasePrice, @Min(0) @Max(10000000) int available) {
-    super();
-    this.id = id;
-    this.name = name;
-    this.image = image;
-    this.price = price;
-    this.purchasePrice = purchasePrice;
-    this.available = available;
-  }
 
   public long getId() {
     return id;
   }
 
+
+
   public void setId(long id) {
     this.id = id;
   }
+
+
+
+  public String getCode() {
+    return code;
+  }
+
+
+
+  public void setCode(String code) {
+    this.code = code;
+  }
+
+
 
   public String getName() {
     return name;
   }
 
+
+
   public void setName(String name) {
     this.name = name;
   }
 
-  public String getImage() {
-    return image;
+
+
+  public String getImageURL() {
+    return imageURL;
   }
 
-  public void setImage(String image) {
-    this.image = image;
+
+
+  public void setImageURL(String imageURL) {
+    this.imageURL = imageURL;
   }
 
-  public double getPrice() {
+
+
+  public Double getPrice() {
     return price;
   }
 
-  public void setPrice(double price) {
+
+
+  public void setPrice(Double price) {
     this.price = price;
   }
 
-  public double getPurchasePrice() {
+
+
+  public Double getPurchasePrice() {
     return purchasePrice;
   }
 
-  public void setPurchasePrice(double purchasePrice) {
+
+
+  public void setPurchasePrice(Double purchasePrice) {
     this.purchasePrice = purchasePrice;
   }
 
-  public int getAvailable() {
+
+
+  public Integer getAvailable() {
     return available;
   }
 
-  public void setAvailable(int available) {
+
+
+  public void setAvailable(Integer available) {
     this.available = available;
   }
 
+
+
   @Override
   public String toString() {
-    return "Product{id=" + id + ",name=" + name + ", image=" + image + ",price=" + price
-        + ", purchase price=" + purchasePrice + ",quantity available=" + available + "}";
+    return "Product{id=" + id + ",code=" + code + ",name=" + name + ", image=" + imageURL
+        + ",price=" + price + ", purchase price=" + purchasePrice + ",quantity available="
+        + available + "}";
   }
 }

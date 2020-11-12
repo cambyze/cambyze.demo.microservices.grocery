@@ -15,8 +15,8 @@ public class ProductNotFoundException extends RuntimeException {
    * Exception triggered when the product doesn't exist
    */
 
-  public ProductNotFoundException(long id) {
-    super("Product with the requested id=" + id + " doesn't exist");
+  public ProductNotFoundException(String code) {
+    super("Product with the requested code=" + code + " doesn't exist");
   }
 
   public ProductNotFoundException() {
