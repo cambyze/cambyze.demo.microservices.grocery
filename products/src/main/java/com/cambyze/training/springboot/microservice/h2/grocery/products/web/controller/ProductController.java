@@ -318,16 +318,16 @@ public class ProductController {
   }
 
   /*
-   * Get product by its product code
+   * Get product by its product reference
    */
-  @ApiOperation(value = "Retrieve a product with its product code")
-  @GetMapping(value = "/products/{code}")
-  public Product getProductbyCode(@PathVariable String code) throws RuntimeException {
-    Product product = productDao.findByCode(code);
+  @ApiOperation(value = "Retrieve a product with its product reference")
+  @GetMapping(value = "/products/{reference}")
+  public Product getProductbyCode(@PathVariable String reference) throws RuntimeException {
+    Product product = productDao.findByReference(reference);
     if (product == null) {
-      throw new ProductNotFoundException(code);
+      throw new ProductNotFoundException(reference);
     } else {
-      LOGGER.info("Product code:" + code + " = " + product);
+      LOGGER.info("Product reference:" + reference + " = " + product);
       return product;
     }
   }
@@ -372,7 +372,7 @@ public class ProductController {
               MathTools.roundWithDecimals(unitMargin * product.getAvailable(), NBDECIMALS);
         }
       }
-      LOGGER.info("Margins for the product " + product.getCode() + " = " + unitMargin + " , "
+      LOGGER.info("Margins for the product " + product.getReference() + " = " + unitMargin + " , "
           + potentialMargin);
       productsMargins.add(new ProductMargin(product, unitMargin, potentialMargin));
     }
@@ -397,9 +397,9 @@ public class ProductController {
       if (newProduct == null) {
         return ResponseEntity.noContent().build();
       } else {
-        LOGGER.info("Create product " + newProduct.getCode() + " with values = " + newProduct);
-        uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{code}")
-            .buildAndExpand(newProduct.getCode()).toUri();
+        LOGGER.info("Create product " + newProduct.getReference() + " with values = " + newProduct);
+        uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{reference}")
+            .buildAndExpand(newProduct.getReference()).toUri();
         MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_CREATED,
             "Creation successful", uri, null, null, null);
         return ResponseEntity.created(uri).body(body);
@@ -413,19 +413,19 @@ public class ProductController {
    * Remove a product
    */
   @ApiOperation(value = "Remove a product from the inventory")
-  @DeleteMapping(value = "/products/{code}")
-  public ResponseEntity<Object> deleteProduct(@PathVariable String code) {
+  @DeleteMapping(value = "/products/{reference}")
+  public ResponseEntity<Object> deleteProduct(@PathVariable String reference) {
     URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
     try {
-      Product product = productDao.findByCode(code);
+      Product product = productDao.findByReference(reference);
       if (product != null) {
-        LOGGER.info("Remove product " + code + " with values = " + product);
+        LOGGER.info("Remove product " + reference + " with values = " + product);
         productDao.deleteById(product.getId());
         MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_OK,
             "Deletion successful", uri, null, null, null);
         return ResponseEntity.ok().body(body);
       } else {
-        throw new ProductNotFoundException(code);
+        throw new ProductNotFoundException(reference);
       }
     } catch (Exception ex) {
       return buildResponseException(uri, ex);
@@ -436,22 +436,22 @@ public class ProductController {
    * Change a product
    */
   @ApiOperation(value = "Modify all the attributes of a product of the inventory")
-  @PutMapping(value = "/products/{code}")
+  @PutMapping(value = "/products/{reference}")
   public ResponseEntity<Object> updateProduct(@RequestBody Product product,
-      @PathVariable String code) {
+      @PathVariable String reference) {
     URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
     try {
-      Product existingProduct = productDao.findByCode(code);
+      Product existingProduct = productDao.findByReference(reference);
       if (existingProduct != null && product != null) {
         product.setId(existingProduct.getId());
-        product.setCode(code);
-        LOGGER.info("Full update of product " + code + " with values = " + product);
+        product.setReference(reference);
+        LOGGER.info("Full update of product " + reference + " with values = " + product);
         productDao.save(product);
         MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_OK,
             "Update successful", uri, null, null, null);
         return ResponseEntity.ok().body(body);
       } else {
-        throw new ProductNotFoundException(code);
+        throw new ProductNotFoundException(reference);
       }
     } catch (Exception ex) {
       return buildResponseException(uri, ex);
@@ -462,16 +462,16 @@ public class ProductController {
    * Change partially a product
    */
   @ApiOperation(value = "Modify some attributes of a product of the inventory")
-  @PatchMapping(value = "/products/{code}")
+  @PatchMapping(value = "/products/{reference}")
   public ResponseEntity<Object> partialUpdateProduct(@RequestBody Product product,
-      @PathVariable String code) {
+      @PathVariable String reference) {
     URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
     try {
-      Product existingProduct = productDao.findByCode(code);
+      Product existingProduct = productDao.findByReference(reference);
       if (existingProduct != null && product != null) {
         product.setId(existingProduct.getId());
-        product.setCode(code);
-        LOGGER.info("Partial update of product " + code + " with values = " + product);
+        product.setReference(reference);
+        LOGGER.info("Partial update of product " + reference + " with values = " + product);
         if (product.getAvailable() != null) {
           existingProduct.setAvailable(product.getAvailable());
         }
@@ -493,7 +493,7 @@ public class ProductController {
             "Partial update successful", uri, null, null, null);
         return ResponseEntity.ok().body(body);
       } else {
-        throw new ProductNotFoundException(code);
+        throw new ProductNotFoundException(reference);
       }
     } catch (Exception ex) {
       return buildResponseException(uri, ex);

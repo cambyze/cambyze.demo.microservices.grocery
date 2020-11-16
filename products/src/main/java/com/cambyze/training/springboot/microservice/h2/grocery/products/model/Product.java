@@ -17,7 +17,7 @@ import com.cambyze.commons.MathTools;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(indexes = {@Index(columnList = "code", name = "indProductCode", unique = true)})
+@Table(indexes = {@Index(columnList = "reference", name = "indProductReference", unique = true)})
 public class Product {
 
   private static final int NBDECIMALS = 2;
@@ -30,7 +30,7 @@ public class Product {
 
   @NotBlank
   @Length(min = 5, max = 50)
-  private String code;
+  private String reference;
 
   @Length(min = 3, max = 255)
   private String name;
@@ -54,9 +54,9 @@ public class Product {
   /*
    * Format code a upper case String
    */
-  private void formatProductCode() {
-    if (this.code != null) {
-      this.code = this.code.toUpperCase();
+  private void formatProductReference() {
+    if (this.reference != null) {
+      this.reference = this.reference.toUpperCase();
     }
   }
 
@@ -75,7 +75,7 @@ public class Product {
 
   @PrePersist
   private void prePersist() {
-    formatProductCode();
+    formatProductReference();
     formatProductAmounts();
   }
 
@@ -97,14 +97,14 @@ public class Product {
 
 
 
-  public String getCode() {
-    return code;
+  public String getReference() {
+    return reference;
   }
 
 
 
-  public void setCode(String code) {
-    this.code = code;
+  public void setReference(String reference) {
+    this.reference = reference;
   }
 
 
@@ -171,7 +171,7 @@ public class Product {
 
   @Override
   public String toString() {
-    return "Product{id=" + id + ",code=" + code + ",name=" + name + ", image=" + imageURL
+    return "Product{id=" + id + ",reference=" + reference + ",name=" + name + ", image=" + imageURL
         + ",price=" + price + ", purchase price=" + purchasePrice + ",quantity available="
         + available + "}";
   }

@@ -15,11 +15,11 @@ public interface ProductDao extends JpaRepository<Product, Long> {
   // https://docs.spring.io/spring-data/data-jpa/docs/2.3.2.RELEASE/reference/html/#jpa.query-methods.query-creation
   // to see Supported keywords inside method names
 
-  Product findByCode(String code);
+  Product findByReference(String reference);
 
   List<Product> findByAvailableGreaterThan(int quantity);
 
-  @Query("SELECT id,code,name,imageURL,price,purchasePrice,available FROM Product WHERE price <= :priceMax AND available >= :minQuantity")
+  @Query("SELECT id,reference,name,imageURL,price,purchasePrice,available FROM Product WHERE price <= :priceMax AND available >= :minQuantity")
 
   List<Product> findByMaxPriceAndMinQuantity(@Param("priceMax") double priceMax,
       @Param("minQuantity") int minQuantity);
