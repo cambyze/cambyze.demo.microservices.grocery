@@ -52,7 +52,7 @@ public class Product {
 
 
   /*
-   * Format code a upper case String
+   * Format reference a upper case String
    */
   private void formatProductReference() {
     if (this.reference != null) {

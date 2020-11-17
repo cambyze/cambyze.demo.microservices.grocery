@@ -1,19 +1,13 @@
 package com.cambyze.training.springboot.microservice.h2.grocery.products.web.controller;
 
 import java.net.URI;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +20,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.cambyze.commons.MathTools;
+import com.cambyze.commons.microservices.controller.MicroserviceControllerService;
+import com.cambyze.commons.microservices.model.MicroserviceResponseBody;
 import com.cambyze.training.springboot.microservice.h2.grocery.products.dao.ProductDao;
 import com.cambyze.training.springboot.microservice.h2.grocery.products.model.Product;
+import com.cambyze.training.springboot.microservice.h2.grocery.products.web.exceptions.ProductAlreadyExistsException;
+import com.cambyze.training.springboot.microservice.h2.grocery.products.web.exceptions.ProductMandatoryReferenceException;
 import com.cambyze.training.springboot.microservice.h2.grocery.products.web.exceptions.ProductNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,136 +45,8 @@ public class ProductController {
   @Autowired
   private ProductDao productDao;
 
-  /*
-   * Response body for microservices
-   */
-  public class MicroserviceResponseBody {
-
-    private int status;
-    private String timestamp;
-    private String message;
-    private String error;
-    private String exception;
-    private URI path;
-
-    private List<microserviceResponseError> errors;
-
-    public MicroserviceResponseBody() {
-      super();
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss*SSSZZZZ");
-      this.timestamp = dateFormat.format(Calendar.getInstance().getTime());
-      this.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-    }
-
-
-    public MicroserviceResponseBody(int status, String message, URI path, String error,
-        String exception, List<microserviceResponseError> errors) {
-      super();
-      this.status = status;
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss*SSSZZZZ");
-      this.timestamp = dateFormat.format(Calendar.getInstance().getTime());
-      this.message = message;
-      this.path = path;
-      this.error = error;
-      this.exception = exception;
-      this.errors = errors;
-    }
-
-    public int getStatus() {
-      return status;
-    }
-
-    public void setStatus(int status) {
-      this.status = status;
-    }
-
-    public String getTimestamp() {
-      return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-      this.timestamp = timestamp;
-    }
-
-    public URI getPath() {
-      return path;
-    }
-
-    public void setPath(URI path) {
-      this.path = path;
-    }
-
-    public String getMessage() {
-      return message;
-    }
-
-    public void setMessage(String message) {
-      this.message = message;
-    }
-
-    public String getError() {
-      return error;
-    }
-
-
-    public void setError(String error) {
-      this.error = error;
-    }
-
-
-    public String getException() {
-      return exception;
-    }
-
-
-    public void setException(String exception) {
-      this.exception = exception;
-    }
-
-
-    public List<microserviceResponseError> getErrors() {
-      return errors;
-    }
-
-    public void setErrors(List<microserviceResponseError> errors) {
-      this.errors = errors;
-    }
-  }
-
-  /*
-   * Error information in case of microservices errors
-   */
-  public class microserviceResponseError {
-    String message;
-    String exception;
-
-    public microserviceResponseError() {
-      super();
-    }
-
-    public microserviceResponseError(String message, String exception) {
-      super();
-      this.message = message;
-      this.exception = exception;
-    }
-
-    public String getMessage() {
-      return message;
-    }
-
-    public void setMessage(String message) {
-      this.message = message;
-    }
-
-    public String getException() {
-      return exception;
-    }
-
-    public void setException(String exception) {
-      this.exception = exception;
-    }
-
-  }
+  @Autowired
+  private MicroserviceControllerService microserviceControllerService;
 
 
   /*
@@ -223,112 +93,24 @@ public class ProductController {
     }
   }
 
-  /*
-   * Analyse exception in order to build a response body for the microservices with errors
-   */
-  private ResponseEntity<Object> buildResponseException(URI path, Exception exception) {
-
-    // Initialisation
-    MicroserviceResponseBody microserviceResponseBody = new MicroserviceResponseBody();
-    microserviceResponseBody.setPath(path);
-    // Default status
-    microserviceResponseBody.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    ArrayList<microserviceResponseError> errors = new ArrayList<microserviceResponseError>();
-    microserviceResponseBody.setErrors(errors);
-
-    // Exception analysis
-    updateMicroserviceResponseBodyWithException(microserviceResponseBody, exception, null);
-
-    // Determine the error message according to the HTTP status
-    switch (microserviceResponseBody.getStatus()) {
-      case HttpServletResponse.SC_NOT_FOUND:
-        microserviceResponseBody.setError(HttpStatus.NOT_FOUND.toString());
-        break;
-      case HttpServletResponse.SC_BAD_REQUEST:
-        microserviceResponseBody.setError(HttpStatus.BAD_REQUEST.toString());
-        break;
-      case HttpServletResponse.SC_NO_CONTENT:
-        microserviceResponseBody.setError(HttpStatus.NO_CONTENT.toString());
-        break;
-      default:
-        microserviceResponseBody.setError(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-    }
-    return ResponseEntity.status(microserviceResponseBody.getStatus())
-        .body(microserviceResponseBody);
-  }
-
-  /*
-   * Recursively analyse the exception and cause in order to fill the microservices response body in
-   * case of error
-   */
-  private void updateMicroserviceResponseBodyWithException(
-      MicroserviceResponseBody microserviceResponseBody, Throwable throwable, Throwable parent) {
-    if (throwable != null) {
-      LOGGER.error(throwable.getMessage());
-
-      // Force status NOT_FOUND
-      if (throwable instanceof ProductNotFoundException) {
-        microserviceResponseBody.setStatus(HttpServletResponse.SC_NOT_FOUND);
-      }
-
-      // First call
-      if (parent == null) {
-        microserviceResponseBody.setMessage(throwable.getMessage());
-        microserviceResponseBody.setException(throwable.getClass().getName());
-        microserviceResponseBody.getErrors().add(
-            new microserviceResponseError(throwable.getMessage(), throwable.getClass().getName()));
-      }
-      // Recursive calls with exception different that the parent to prevent duplicated values
-      else if (throwable.getClass() != null && throwable.getMessage() != null
-          && parent.getClass() != null
-          && !throwable.getClass().getName().equalsIgnoreCase(parent.getClass().getName())) {
-        // Add new error
-        microserviceResponseBody.getErrors().add(
-            new microserviceResponseError(throwable.getMessage(), throwable.getClass().getName()));
-
-        // Management of the Hibernate constraint violation
-        if (throwable instanceof ConstraintViolationException) {
-          ConstraintViolationException constraintViolationException =
-              (ConstraintViolationException) throwable;
-          Set<ConstraintViolation<?>> constraintViolations =
-              constraintViolationException.getConstraintViolations();
-          if (constraintViolations != null && !constraintViolations.isEmpty()) {
-            for (ConstraintViolation<?> constraintViolation : constraintViolations) {
-              if (constraintViolation != null) {
-                LOGGER.error(constraintViolation.getMessage());
-
-                // Data validation error = BAD_REQUEST
-                // Construction of the final message
-                if (constraintViolation.getPropertyPath() != null
-                    && constraintViolation.getMessage() != null)
-                  microserviceResponseBody.setMessage("'" + constraintViolation.getPropertyPath()
-                      + "': " + constraintViolation.getMessage().toString());
-                microserviceResponseBody.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                microserviceResponseBody.setException(throwable.getClass().getName());
-              }
-            }
-          }
-        }
-      }
-
-      // Recursive call
-      updateMicroserviceResponseBodyWithException(microserviceResponseBody, throwable.getCause(),
-          throwable);
-    }
-  }
 
   /*
    * Get product by its product reference
    */
   @ApiOperation(value = "Retrieve a product with its product reference")
   @GetMapping(value = "/products/{reference}")
-  public Product getProductbyCode(@PathVariable String reference) throws RuntimeException {
-    Product product = productDao.findByReference(reference);
-    if (product == null) {
-      throw new ProductNotFoundException(reference);
+  public Product getProductbyReference(@PathVariable String reference) throws RuntimeException {
+    if (reference != null) {
+      reference = reference.toUpperCase().trim();
+      Product product = productDao.findByReference(reference);
+      if (product == null) {
+        throw new ProductNotFoundException(reference);
+      } else {
+        LOGGER.info("Product reference:" + reference + " = " + product);
+        return product;
+      }
     } else {
-      LOGGER.info("Product reference:" + reference + " = " + product);
-      return product;
+      throw new ProductMandatoryReferenceException();
     }
   }
 
@@ -393,19 +175,35 @@ public class ProductController {
     // Temporary URI
     URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
     try {
-      Product newProduct = productDao.save(product);
-      if (newProduct == null) {
-        return ResponseEntity.noContent().build();
+      // verification of the request body
+      if (product != null && product.getReference() != null) {
+        // the product reference is an uppercase code
+        product.setReference(product.getReference().toUpperCase().trim());
+        Product existingProduct = productDao.findByReference(product.getReference());
+        // verifies that the product to be created is unique
+        if (existingProduct == null) {
+          Product newProduct = productDao.save(product);
+          if (newProduct == null) {
+            // creation failed
+            return ResponseEntity.noContent().build();
+          } else {
+            // creation successful
+            LOGGER.info(
+                "Create product " + newProduct.getReference() + " with values = " + newProduct);
+            uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{reference}")
+                .buildAndExpand(newProduct.getReference()).toUri();
+            MicroserviceResponseBody body = new MicroserviceResponseBody(
+                HttpServletResponse.SC_CREATED, "Creation successful", uri, null, null, null);
+            return ResponseEntity.created(uri).body(body);
+          }
+        } else {
+          throw new ProductAlreadyExistsException(product.getReference());
+        }
       } else {
-        LOGGER.info("Create product " + newProduct.getReference() + " with values = " + newProduct);
-        uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{reference}")
-            .buildAndExpand(newProduct.getReference()).toUri();
-        MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_CREATED,
-            "Creation successful", uri, null, null, null);
-        return ResponseEntity.created(uri).body(body);
+        throw new ProductMandatoryReferenceException();
       }
     } catch (Exception ex) {
-      return buildResponseException(uri, ex);
+      return microserviceControllerService.buildResponseException(uri, ex);
     }
   }
 
@@ -417,18 +215,25 @@ public class ProductController {
   public ResponseEntity<Object> deleteProduct(@PathVariable String reference) {
     URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
     try {
-      Product product = productDao.findByReference(reference);
-      if (product != null) {
-        LOGGER.info("Remove product " + reference + " with values = " + product);
-        productDao.deleteById(product.getId());
-        MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_OK,
-            "Deletion successful", uri, null, null, null);
-        return ResponseEntity.ok().body(body);
+      // verification of the request body
+      if (reference != null) {
+        // the product reference is an uppercase code
+        reference = reference.toUpperCase().trim();
+        Product product = productDao.findByReference(reference);
+        if (product != null) {
+          LOGGER.info("Remove product " + reference + " with values = " + product);
+          productDao.deleteById(product.getId());
+          MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_OK,
+              "Deletion successful", uri, null, null, null);
+          return ResponseEntity.ok().body(body);
+        } else {
+          throw new ProductNotFoundException(reference);
+        }
       } else {
-        throw new ProductNotFoundException(reference);
+        throw new ProductMandatoryReferenceException();
       }
     } catch (Exception ex) {
-      return buildResponseException(uri, ex);
+      return microserviceControllerService.buildResponseException(uri, ex);
     }
   }
 
@@ -454,7 +259,7 @@ public class ProductController {
         throw new ProductNotFoundException(reference);
       }
     } catch (Exception ex) {
-      return buildResponseException(uri, ex);
+      return microserviceControllerService.buildResponseException(uri, ex);
     }
   }
 
@@ -496,7 +301,7 @@ public class ProductController {
         throw new ProductNotFoundException(reference);
       }
     } catch (Exception ex) {
-      return buildResponseException(uri, ex);
+      return microserviceControllerService.buildResponseException(uri, ex);
     }
   }
 }
