@@ -19,8 +19,8 @@ public interface ProductDao extends JpaRepository<Product, Long> {
 
   List<Product> findByAvailableGreaterThan(int quantity);
 
-  @Query("SELECT id,reference,name,imageURL,price,purchasePrice,available FROM Product WHERE price <= :priceMax AND available >= :minQuantity")
-
+  @Query("SELECT id, reference, name, imageURL, price, purchasePrice, available FROM Product "
+      + "WHERE price <= :priceMax AND available >= :minQuantity")
   List<Product> findByMaxPriceAndMinQuantity(@Param("priceMax") double priceMax,
       @Param("minQuantity") int minQuantity);
 

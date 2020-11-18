@@ -2,10 +2,15 @@ package com.cambyze.training.springboot.microservice.h2.grocery.products.web.exc
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import com.cambyze.commons.microservices.web.exceptions.EntityAlreadyExistsException;
+import com.cambyze.commons.microservices.web.exceptions.RecordAlreadyExistsException;
 
+/**
+ * Product exception
+ * 
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
+ */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class ProductAlreadyExistsException extends EntityAlreadyExistsException {
+public class ProductAlreadyExistsException extends RecordAlreadyExistsException {
 
   private static final long serialVersionUID = 2307460542505704490L;
 
@@ -20,7 +25,7 @@ public class ProductAlreadyExistsException extends EntityAlreadyExistsException 
    * Exception triggered when the product already exists
    */
   public ProductAlreadyExistsException() {
-    super("A product already exists for the requested parameters");
+    super("A product already exists with the requested parameters");
   }
 
 }

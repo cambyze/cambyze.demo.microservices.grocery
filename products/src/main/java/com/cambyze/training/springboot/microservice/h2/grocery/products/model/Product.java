@@ -23,7 +23,7 @@ public class Product {
   private static final int NBDECIMALS = 2;
 
   @Id
-  @SequenceGenerator(name = "productSequence", initialValue = 200, allocationSize = 10)
+  @SequenceGenerator(name = "productSequence", initialValue = 1, allocationSize = 10)
   @GeneratedValue(generator = "productSequence")
   @JsonIgnore
   private long id;
@@ -50,13 +50,30 @@ public class Product {
   @Max(value = 10000000)
   private Integer available;
 
+  public Product() {
+    super();
+  }
+
+  public Product(long id, @NotBlank @Length(min = 5, max = 50) String reference,
+      @Length(min = 3, max = 255) String name, @URL String imageURL,
+      @Min(0) @Max(100000) Double price, @Min(0) @Max(100000) Double purchasePrice,
+      @Min(0) @Max(10000000) Integer available) {
+    super();
+    this.id = id;
+    this.reference = reference;
+    this.name = name;
+    this.imageURL = imageURL;
+    this.price = price;
+    this.purchasePrice = purchasePrice;
+    this.available = available;
+  }
 
   /*
    * Format reference a upper case String
    */
   private void formatProductReference() {
     if (this.reference != null) {
-      this.reference = this.reference.toUpperCase();
+      this.reference = this.reference.toUpperCase().trim();
     }
   }
 

@@ -49,8 +49,7 @@ public class ProductController {
   @Autowired
   private MicroserviceControllerService microserviceControllerService;
 
-
-  /*
+  /**
    * Response body for calculated margins
    */
   public class ProductMargin {
@@ -95,8 +94,11 @@ public class ProductController {
   }
 
 
-  /*
+  /**
    * Get product by its product reference
+   * 
+   * @param reference reference of the product to find *
+   * @return a product with the reference
    */
   @ApiOperation(value = "Retrieve a product with its product reference")
   @GetMapping(value = END_OF_PATH_PRODUCT + "/{reference}")
@@ -115,13 +117,17 @@ public class ProductController {
     }
   }
 
-  /*
+  /**
    * Find products available for at least the requested quantity
+   * 
+   * @param quantityMin quantity minimum available for the product (it is an optional parameter) *
+   * @return a list of products
+   * 
    */
   @ApiOperation(value = "Find products available for at least the requested quantity")
   @GetMapping(value = END_OF_PATH_PRODUCT)
   public List<Product> getProducts(
-      @RequestParam(value = "quantityMin", defaultValue = "0") int quantityMin) {
+      @RequestParam(value = "quantityMin", defaultValue = "0", required = false) int quantityMin) {
     if (quantityMin < 0) {
       quantityMin = 0;
     }
@@ -136,8 +142,11 @@ public class ProductController {
   }
 
 
-  /*
+  /**
    * Calculate margin per product
+   * 
+   * @return list of products with the margin per product and the potential margin according to the
+   *         stock
    */
   @ApiOperation(value = "Calculate margin per product")
   @GetMapping(value = END_OF_PATH_PRODUCT + "/margins")
@@ -167,8 +176,11 @@ public class ProductController {
   }
 
 
-  /*
+  /**
    * Create a new product
+   * 
+   * @param product the product to be created
+   * @return a response body with information about the created product or errors when occurred
    */
   @ApiOperation(value = "Create a new product in the inventory")
   @PostMapping(value = END_OF_PATH_PRODUCT)
@@ -212,8 +224,11 @@ public class ProductController {
     }
   }
 
-  /*
+  /**
    * Remove a product
+   *
+   * @param reference the reference of the product to be deleted
+   * @return a response body with information about the removal action or errors when occurred
    */
   @ApiOperation(value = "Remove a product from the inventory")
   @DeleteMapping(value = END_OF_PATH_PRODUCT + "/{reference}")
@@ -244,8 +259,12 @@ public class ProductController {
     }
   }
 
-  /*
+  /**
    * Change a product
+   * 
+   * @param reference the reference of the product to be updated
+   * @param product data to be updated
+   * @return a response body with information about the modified product or errors when occurred
    */
   @ApiOperation(value = "Modify all the attributes of a product of the inventory")
   @PutMapping(value = END_OF_PATH_PRODUCT + "/{reference}")
@@ -262,7 +281,7 @@ public class ProductController {
         Product existingProduct = productDao.findByReference(reference);
         if (existingProduct != null && product != null) {
           product.setId(existingProduct.getId());
-          product.setReference(reference);
+          product.setReference(existingProduct.getReference());
           LOGGER.info("Full update of product " + reference + " with values = " + product);
           productDao.save(product);
           MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_OK,
@@ -279,8 +298,12 @@ public class ProductController {
     }
   }
 
-  /*
+  /**
    * Change partially a product
+   * 
+   * @param reference the reference of the product to be updated
+   * @param product data to be updated
+   * @return a response body with information about the modified product or errors when occurred
    */
   @ApiOperation(value = "Modify some attributes of a product of the inventory")
   @PatchMapping(value = END_OF_PATH_PRODUCT + "/{reference}")

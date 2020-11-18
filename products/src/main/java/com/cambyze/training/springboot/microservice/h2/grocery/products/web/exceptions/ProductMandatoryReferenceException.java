@@ -2,10 +2,15 @@ package com.cambyze.training.springboot.microservice.h2.grocery.products.web.exc
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import com.cambyze.commons.microservices.web.exceptions.EntityMandatoryAttributeException;
+import com.cambyze.commons.microservices.web.exceptions.RecordMandatoryAttributeException;
 
+/**
+ * Product exception
+ * 
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
+ */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class ProductMandatoryReferenceException extends EntityMandatoryAttributeException {
+public class ProductMandatoryReferenceException extends RecordMandatoryAttributeException {
 
   private static final long serialVersionUID = 8373143065668512694L;
 

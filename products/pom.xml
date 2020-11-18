@@ -31,7 +31,8 @@
       <artifactId>commons-tools</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-    
+        
+    <!-- REST API documentation -->
     <dependency>
       <groupId>io.springfox</groupId>
       <artifactId>springfox-boot-starter</artifactId>
