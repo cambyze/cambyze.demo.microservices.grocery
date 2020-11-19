@@ -13,15 +13,25 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
-import com.cambyze.commons.DateTools;
+import com.cambyze.commons.microservices.model.PersistEntity;
+import com.cambyze.commons.tools.DateTools;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * 
+ * Persistence entity for orders
+ * 
+ * @author Thierry Nestelhut
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
+ */
 @Entity
 @Table(
     indexes = {@Index(columnList = "reference", name = "indPurchaseOrderReference", unique = true),
         @Index(columnList = "productReference", name = "indPurchaseOrderProductReference",
             unique = false)})
-public class PurchaseOrder {
+public class PurchaseOrder extends PersistEntity {
+
+  private static final String ENTITY_NAME = "purchase order";
 
   @Id
   @SequenceGenerator(name = "purchaseOrderSequence", initialValue = 1, allocationSize = 10)
@@ -45,6 +55,10 @@ public class PurchaseOrder {
 
   private Boolean paid;
 
+  public String getEntityName() {
+    return ENTITY_NAME;
+  }
+
   /*
    * Format references as upper case String
    */
@@ -57,7 +71,7 @@ public class PurchaseOrder {
     }
   }
 
-  /*
+  /**
    * Format external references as upper case String
    */
   private void formatExternalReferences() {
@@ -66,12 +80,18 @@ public class PurchaseOrder {
     }
   }
 
+  /**
+   * Executed before insertion
+   */
   @PrePersist
   private void prePersist() {
     formatReferences();
     this.orderDate = DateTools.dateWithTimeAtStartOfDay(this.orderDate);
   }
 
+  /**
+   * Executed before update
+   */
   @PreUpdate
   private void preUpate() {
     formatExternalReferences();
@@ -93,6 +113,11 @@ public class PurchaseOrder {
     this.orderDate = orderDate;
     this.quantity = quantity;
     this.paid = paid;
+  }
+
+  public PurchaseOrder(@NotBlank @Length(min = 5, max = 50) String reference) {
+    super();
+    this.reference = reference;
   }
 
   public long getId() {
@@ -148,7 +173,6 @@ public class PurchaseOrder {
     return "Order{id=" + id + ", reference=" + reference + ", product=" + productReference
         + ", date of order=" + orderDate + ",quantity=" + quantity + ", paid=" + paid + "}";
   }
-
 
 
 }

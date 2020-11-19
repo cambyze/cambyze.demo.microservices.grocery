@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.cambyze.commons.microservices.model.PersistEntity;
 import com.cambyze.commons.microservices.web.controller.MicroserviceControllerService;
 import com.cambyze.commons.microservices.web.exceptions.RecordNotFoundException;
 import com.cambyze.commons.tools.MathTools;
@@ -38,7 +39,6 @@ import io.swagger.annotations.ApiOperation;
 public class ProductController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
-  private static final int NBDECIMALS = 2;
   private static final String PATH_PRODUCT = "/products";
 
   @Autowired
@@ -119,12 +119,12 @@ public class ProductController {
   @GetMapping(value = PATH_PRODUCT)
   public List<Product> getProducts(
       @RequestParam(value = "quantityMin", defaultValue = "0", required = false) int quantityMin) {
-    Product searchProduct = new Product();
     if (quantityMin < 0) {
       quantityMin = 0;
     }
     List<Product> products = productDao.findByAvailableGreaterThan(quantityMin);
     if (products == null || products.isEmpty()) {
+      Product searchProduct = new Product();
       throw new RecordNotFoundException(searchProduct);
     } else {
       LOGGER.info(
@@ -151,10 +151,10 @@ public class ProductController {
       Double potentialMargin = 0.0;
       if (product.getPrice() != null && product.getPurchasePrice() != null) {
         unitMargin = MathTools.roundWithDecimals(product.getPrice() - product.getPurchasePrice(),
-            NBDECIMALS);
+            PersistEntity.NBDECIMALS);
         if (product.getAvailable() != null) {
-          potentialMargin =
-              MathTools.roundWithDecimals(unitMargin * product.getAvailable(), NBDECIMALS);
+          potentialMargin = MathTools.roundWithDecimals(unitMargin * product.getAvailable(),
+              PersistEntity.NBDECIMALS);
         }
       }
       LOGGER.info("Margins for the product " + product.getReference() + " = " + unitMargin + " , "
@@ -179,18 +179,18 @@ public class ProductController {
   @PostMapping(value = PATH_PRODUCT)
   public ResponseEntity<Object> createProduct(@Valid @RequestBody Product product) {
 
-    ResponseEntity<Object> ErrorResult =
-        microserviceControllerService.prepareRequestEntityToPersist("", product,
-            MicroserviceControllerService.OPERATION_CREATION);
+    ResponseEntity<Object> ErrorResult = microserviceControllerService
+        .prepareRequestEntityToPersist("", product, MicroserviceControllerService.OPERATION_CREATE);
     if (ErrorResult != null) {
       return ErrorResult;
     } else {
 
+      // Verify if the product does not already exist
       Product existingProduct = productDao.findByReference(product.getReference());
 
       URI uri = microserviceControllerService.createTargetURI(product, PATH_PRODUCT);
-      ErrorResult = microserviceControllerService.prepareEntityForUpdate(product, existingProduct,
-          uri, MicroserviceControllerService.OPERATION_CREATION);
+      ErrorResult = microserviceControllerService.prepareEntityForCUD(product, existingProduct, uri,
+          MicroserviceControllerService.OPERATION_CREATE);
       if (ErrorResult != null) {
         return ErrorResult;
       } else {
@@ -198,8 +198,8 @@ public class ProductController {
         // creation of the product
         Product newProduct = productDao.save(product);
 
-        return microserviceControllerService.createResponseBodyForUpdateSuccessful(newProduct, uri,
-            MicroserviceControllerService.OPERATION_CREATION);
+        return microserviceControllerService.createResponseBodyCUDSuccessful(newProduct, uri,
+            MicroserviceControllerService.OPERATION_CREATE);
       }
     }
   }
@@ -215,21 +215,20 @@ public class ProductController {
   @DeleteMapping(value = PATH_PRODUCT + "/{reference}")
   public ResponseEntity<Object> deleteProduct(@PathVariable String reference) {
 
-    Product product = new Product();
-    product.setReference(reference);
+    Product product = new Product(reference);
     ResponseEntity<Object> ErrorResult =
         microserviceControllerService.prepareRequestEntityToPersist(reference, product,
-            MicroserviceControllerService.OPERATION_SUPPRESSION);
+            MicroserviceControllerService.OPERATION_DELETE);
     if (ErrorResult != null) {
       return ErrorResult;
     } else {
 
-      // Search the product to update
+      // Search the product to remove
       Product existingProduct = productDao.findByReference(product.getReference());
 
       URI uri = microserviceControllerService.createTargetURI(product, PATH_PRODUCT);
-      ErrorResult = microserviceControllerService.prepareEntityForUpdate(product, existingProduct,
-          uri, MicroserviceControllerService.OPERATION_SUPPRESSION);
+      ErrorResult = microserviceControllerService.prepareEntityForCUD(product, existingProduct, uri,
+          MicroserviceControllerService.OPERATION_DELETE);
       if (ErrorResult != null) {
         return ErrorResult;
       } else {
@@ -237,8 +236,8 @@ public class ProductController {
         // remove the product
         productDao.deleteById(product.getId());
 
-        return microserviceControllerService.createResponseBodyForUpdateSuccessful(existingProduct,
-            uri, MicroserviceControllerService.OPERATION_SUPPRESSION);
+        return microserviceControllerService.createResponseBodyCUDSuccessful(existingProduct, uri,
+            MicroserviceControllerService.OPERATION_DELETE);
 
       }
     }
@@ -267,8 +266,8 @@ public class ProductController {
       Product existingProduct = productDao.findByReference(product.getReference());
 
       URI uri = microserviceControllerService.createTargetURI(product, PATH_PRODUCT);
-      ErrorResult = microserviceControllerService.prepareEntityForUpdate(product, existingProduct,
-          uri, MicroserviceControllerService.OPERATION_FULL_UPDATE);
+      ErrorResult = microserviceControllerService.prepareEntityForCUD(product, existingProduct, uri,
+          MicroserviceControllerService.OPERATION_FULL_UPDATE);
       if (ErrorResult != null) {
         return ErrorResult;
       } else {
@@ -276,8 +275,8 @@ public class ProductController {
         // Save the modification
         productDao.save(product);
 
-        return microserviceControllerService.createResponseBodyForUpdateSuccessful(existingProduct,
-            uri, MicroserviceControllerService.OPERATION_FULL_UPDATE);
+        return microserviceControllerService.createResponseBodyCUDSuccessful(product, uri,
+            MicroserviceControllerService.OPERATION_FULL_UPDATE);
       }
     }
   }
@@ -307,8 +306,8 @@ public class ProductController {
       Product existingProduct = productDao.findByReference(product.getReference());
 
       URI uri = microserviceControllerService.createTargetURI(product, PATH_PRODUCT);
-      ErrorResult = microserviceControllerService.prepareEntityForUpdate(product, existingProduct,
-          uri, MicroserviceControllerService.OPERATION_PARTIAL_UPDATE);
+      ErrorResult = microserviceControllerService.prepareEntityForCUD(product, existingProduct, uri,
+          MicroserviceControllerService.OPERATION_PARTIAL_UPDATE);
       if (ErrorResult != null) {
         return ErrorResult;
       } else {
@@ -333,8 +332,8 @@ public class ProductController {
         // Save the modification
         productDao.save(existingProduct);
 
-        return microserviceControllerService.createResponseBodyForUpdateSuccessful(existingProduct,
-            uri, MicroserviceControllerService.OPERATION_PARTIAL_UPDATE);
+        return microserviceControllerService.createResponseBodyCUDSuccessful(existingProduct, uri,
+            MicroserviceControllerService.OPERATION_PARTIAL_UPDATE);
       }
     }
   }

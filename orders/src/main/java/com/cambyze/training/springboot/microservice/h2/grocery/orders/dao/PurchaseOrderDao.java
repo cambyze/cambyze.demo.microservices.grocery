@@ -1,24 +1,38 @@
 package com.cambyze.training.springboot.microservice.h2.grocery.orders.dao;
 
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.cambyze.commons.microservices.dao.PersistEntityDao;
 import com.cambyze.training.springboot.microservice.h2.grocery.orders.model.PurchaseOrder;
 
+/**
+ * DAO for orders entity
+ * 
+ * @author Thierry Nestelhut
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
+ * @see <a href=
+ *      "https://docs.spring.io/spring-data/data-jpa/docs/2.3.2.RELEASE/reference/html/#jpa.query-methods.query-creation">Supported
+ *      keywords inside method names</a>
+ */
 @Repository
-public interface PurchaseOrderDao extends JpaRepository<PurchaseOrder, Long> {
+public interface PurchaseOrderDao extends PersistEntityDao<PurchaseOrder> {
 
-
-  // JPA repositories mapping
-  // https://docs.spring.io/spring-data/data-jpa/docs/2.3.2.RELEASE/reference/html/#jpa.query-methods.query-creation
-  // to see Supported keywords inside method names
-
-  PurchaseOrder findByReference(String reference);
-
+  /**
+   * Find orders for a specific product
+   * 
+   * @param productReference reference of the product
+   * @return list of purchase orders
+   */
   List<PurchaseOrder> findByProductReference(String productReference);
 
+  /**
+   * Find orders paid or unpaid
+   * 
+   * @param paid flag indicates if the order is paid or not
+   * @return list of purchase orders
+   */
   List<PurchaseOrder> findByPaid(Boolean paid);
 
   /**
