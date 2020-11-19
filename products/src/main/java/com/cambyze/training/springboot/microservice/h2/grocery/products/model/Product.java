@@ -13,14 +13,21 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
-import com.cambyze.commons.MathTools;
+import com.cambyze.commons.microservices.model.PersistEntity;
+import com.cambyze.commons.tools.MathTools;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * Persistence entity for products
+ * 
+ * @author Thierry Nestelhut
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
+ */
 @Entity
 @Table(indexes = {@Index(columnList = "reference", name = "indProductReference", unique = true)})
-public class Product {
+public class Product extends PersistEntity {
 
-  private static final int NBDECIMALS = 2;
+  private static final String ENTITY_NAME = "product";
 
   @Id
   @SequenceGenerator(name = "productSequence", initialValue = 1, allocationSize = 10)
@@ -52,6 +59,10 @@ public class Product {
 
   public Product() {
     super();
+  }
+
+  public Product(String reference) {
+    super(reference);
   }
 
   public Product(long id, @NotBlank @Length(min = 5, max = 50) String reference,
@@ -101,23 +112,22 @@ public class Product {
     formatProductAmounts();
   }
 
+  public String getEntityName() {
+    return ENTITY_NAME;
+  }
 
   public long getId() {
     return id;
   }
-
-
 
   public void setId(long id) {
     this.id = id;
   }
 
 
-
   public String getReference() {
     return reference;
   }
-
 
 
   public void setReference(String reference) {

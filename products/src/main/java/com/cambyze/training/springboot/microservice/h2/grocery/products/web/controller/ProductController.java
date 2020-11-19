@@ -3,7 +3,6 @@ package com.cambyze.training.springboot.microservice.h2.grocery.products.web.con
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,22 +17,21 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import com.cambyze.commons.MathTools;
-import com.cambyze.commons.microservices.controller.MicroserviceControllerService;
-import com.cambyze.commons.microservices.model.MicroserviceResponseBody;
+import com.cambyze.commons.microservices.web.controller.MicroserviceControllerService;
+import com.cambyze.commons.microservices.web.exceptions.RecordNotFoundException;
+import com.cambyze.commons.tools.MathTools;
 import com.cambyze.training.springboot.microservice.h2.grocery.products.dao.ProductDao;
 import com.cambyze.training.springboot.microservice.h2.grocery.products.model.Product;
-import com.cambyze.training.springboot.microservice.h2.grocery.products.web.exceptions.ProductAlreadyExistsException;
-import com.cambyze.training.springboot.microservice.h2.grocery.products.web.exceptions.ProductMandatoryReferenceException;
-import com.cambyze.training.springboot.microservice.h2.grocery.products.web.exceptions.ProductNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-/*
+/**
  * REST API controller for products management
  *
  * API documentation configuration and description in class SwaggerConfig
+ * 
+ * @author Thierry Nestelhut
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
  */
 @RestController
 @Api(tags = {"ProductController"})
@@ -41,7 +39,7 @@ public class ProductController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
   private static final int NBDECIMALS = 2;
-  private static final String END_OF_PATH_PRODUCT = "/products";
+  private static final String PATH_PRODUCT = "/products";
 
   @Autowired
   private ProductDao productDao;
@@ -101,20 +99,13 @@ public class ProductController {
    * @return a product with the reference
    */
   @ApiOperation(value = "Retrieve a product with its product reference")
-  @GetMapping(value = END_OF_PATH_PRODUCT + "/{reference}")
+  @GetMapping(value = PATH_PRODUCT + "/{reference}")
   public Product getProductbyReference(@PathVariable String reference) throws RuntimeException {
-    if (reference != null && !reference.isBlank()) {
-      reference = reference.toUpperCase().trim();
-      Product product = productDao.findByReference(reference);
-      if (product == null) {
-        throw new ProductNotFoundException(reference);
-      } else {
-        LOGGER.info("Product reference:" + reference + " = " + product);
-        return product;
-      }
-    } else {
-      throw new ProductMandatoryReferenceException();
-    }
+    Product searchProduct = new Product(reference);
+    microserviceControllerService.prepareSearchingEntity(searchProduct);
+    Product existingProduct = productDao.findByReference(searchProduct.getReference());
+    microserviceControllerService.prepareSendingEntity(existingProduct, searchProduct);
+    return existingProduct;
   }
 
   /**
@@ -125,15 +116,16 @@ public class ProductController {
    * 
    */
   @ApiOperation(value = "Find products available for at least the requested quantity")
-  @GetMapping(value = END_OF_PATH_PRODUCT)
+  @GetMapping(value = PATH_PRODUCT)
   public List<Product> getProducts(
       @RequestParam(value = "quantityMin", defaultValue = "0", required = false) int quantityMin) {
+    Product searchProduct = new Product();
     if (quantityMin < 0) {
       quantityMin = 0;
     }
     List<Product> products = productDao.findByAvailableGreaterThan(quantityMin);
     if (products == null || products.isEmpty()) {
-      throw new ProductNotFoundException();
+      throw new RecordNotFoundException(searchProduct);
     } else {
       LOGGER.info(
           "Products avalaibles for the min quantity " + quantityMin + " = " + products.size());
@@ -149,8 +141,9 @@ public class ProductController {
    *         stock
    */
   @ApiOperation(value = "Calculate margin per product")
-  @GetMapping(value = END_OF_PATH_PRODUCT + "/margins")
+  @GetMapping(value = PATH_PRODUCT + "/margins")
   public List<ProductMargin> getProductsMargins() {
+    Product searchProduct = new Product();
     List<ProductMargin> productsMargins = new ArrayList<ProductMargin>();
     List<Product> products = productDao.findAll();
     for (Product product : products) {
@@ -169,7 +162,7 @@ public class ProductController {
       productsMargins.add(new ProductMargin(product, unitMargin, potentialMargin));
     }
     if (productsMargins == null || productsMargins.isEmpty()) {
-      throw new ProductNotFoundException();
+      throw new RecordNotFoundException(searchProduct);
     } else {
       return productsMargins;
     }
@@ -183,46 +176,34 @@ public class ProductController {
    * @return a response body with information about the created product or errors when occurred
    */
   @ApiOperation(value = "Create a new product in the inventory")
-  @PostMapping(value = END_OF_PATH_PRODUCT)
+  @PostMapping(value = PATH_PRODUCT)
   public ResponseEntity<Object> createProduct(@Valid @RequestBody Product product) {
-    // Temporary URI
-    URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
-    try {
-      // verification of the request body
-      if (product != null && product.getReference() != null) {
-        // the product reference is an uppercase code
-        product.setReference(product.getReference().toUpperCase().trim());
-        uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{reference}")
-            .buildAndExpand(product.getReference()).toUri();
-        uri = microserviceControllerService.formatUriWithCorrectReference(uri, END_OF_PATH_PRODUCT,
-            product.getReference());
-        Product existingProduct = productDao.findByReference(product.getReference());
-        // verifies that the product to be created is unique
-        if (existingProduct == null) {
-          Product newProduct = productDao.save(product);
-          if (newProduct == null) {
-            // creation failed
-            return ResponseEntity.noContent().build();
-          } else {
-            // creation successful
-            LOGGER.info(
-                "Create product " + newProduct.getReference() + " with values = " + newProduct);
-            uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{reference}")
-                .buildAndExpand(newProduct.getReference()).toUri();
-            MicroserviceResponseBody body = new MicroserviceResponseBody(
-                HttpServletResponse.SC_CREATED, "Creation successful", uri, null, null, null);
-            return ResponseEntity.created(uri).body(body);
-          }
-        } else {
-          throw new ProductAlreadyExistsException(product.getReference());
-        }
+
+    ResponseEntity<Object> ErrorResult =
+        microserviceControllerService.prepareRequestEntityToPersist("", product,
+            MicroserviceControllerService.OPERATION_CREATION);
+    if (ErrorResult != null) {
+      return ErrorResult;
+    } else {
+
+      Product existingProduct = productDao.findByReference(product.getReference());
+
+      URI uri = microserviceControllerService.createTargetURI(product, PATH_PRODUCT);
+      ErrorResult = microserviceControllerService.prepareEntityForUpdate(product, existingProduct,
+          uri, MicroserviceControllerService.OPERATION_CREATION);
+      if (ErrorResult != null) {
+        return ErrorResult;
       } else {
-        throw new ProductMandatoryReferenceException();
+
+        // creation of the product
+        Product newProduct = productDao.save(product);
+
+        return microserviceControllerService.createResponseBodyForUpdateSuccessful(newProduct, uri,
+            MicroserviceControllerService.OPERATION_CREATION);
       }
-    } catch (Exception ex) {
-      return microserviceControllerService.buildResponseException(uri, ex);
     }
   }
+
 
   /**
    * Remove a product
@@ -231,31 +212,35 @@ public class ProductController {
    * @return a response body with information about the removal action or errors when occurred
    */
   @ApiOperation(value = "Remove a product from the inventory")
-  @DeleteMapping(value = END_OF_PATH_PRODUCT + "/{reference}")
+  @DeleteMapping(value = PATH_PRODUCT + "/{reference}")
   public ResponseEntity<Object> deleteProduct(@PathVariable String reference) {
-    URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
-    try {
-      // verification of the request body
-      if (reference != null && !reference.isBlank()) {
-        // the product reference is an uppercase code
-        reference = reference.toUpperCase().trim();
-        uri = microserviceControllerService.formatUriWithCorrectReference(uri, END_OF_PATH_PRODUCT,
-            reference);
-        Product product = productDao.findByReference(reference);
-        if (product != null) {
-          LOGGER.info("Remove product " + reference + " with values = " + product);
-          productDao.deleteById(product.getId());
-          MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_OK,
-              "Deletion successful", uri, null, null, null);
-          return ResponseEntity.ok().body(body);
-        } else {
-          throw new ProductNotFoundException(reference);
-        }
+
+    Product product = new Product();
+    product.setReference(reference);
+    ResponseEntity<Object> ErrorResult =
+        microserviceControllerService.prepareRequestEntityToPersist(reference, product,
+            MicroserviceControllerService.OPERATION_SUPPRESSION);
+    if (ErrorResult != null) {
+      return ErrorResult;
+    } else {
+
+      // Search the product to update
+      Product existingProduct = productDao.findByReference(product.getReference());
+
+      URI uri = microserviceControllerService.createTargetURI(product, PATH_PRODUCT);
+      ErrorResult = microserviceControllerService.prepareEntityForUpdate(product, existingProduct,
+          uri, MicroserviceControllerService.OPERATION_SUPPRESSION);
+      if (ErrorResult != null) {
+        return ErrorResult;
       } else {
-        throw new ProductMandatoryReferenceException();
+
+        // remove the product
+        productDao.deleteById(product.getId());
+
+        return microserviceControllerService.createResponseBodyForUpdateSuccessful(existingProduct,
+            uri, MicroserviceControllerService.OPERATION_SUPPRESSION);
+
       }
-    } catch (Exception ex) {
-      return microserviceControllerService.buildResponseException(uri, ex);
     }
   }
 
@@ -267,36 +252,37 @@ public class ProductController {
    * @return a response body with information about the modified product or errors when occurred
    */
   @ApiOperation(value = "Modify all the attributes of a product of the inventory")
-  @PutMapping(value = END_OF_PATH_PRODUCT + "/{reference}")
+  @PutMapping(value = PATH_PRODUCT + "/{reference}")
   public ResponseEntity<Object> updateProduct(@RequestBody Product product,
       @PathVariable String reference) {
-    URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
-    try {
-      // verification of the request body
-      if (reference != null && !reference.isBlank()) {
-        // the product reference is an uppercase code
-        reference = reference.toUpperCase().trim();
-        uri = microserviceControllerService.formatUriWithCorrectReference(uri, END_OF_PATH_PRODUCT,
-            reference);
-        Product existingProduct = productDao.findByReference(reference);
-        if (existingProduct != null && product != null) {
-          product.setId(existingProduct.getId());
-          product.setReference(existingProduct.getReference());
-          LOGGER.info("Full update of product " + reference + " with values = " + product);
-          productDao.save(product);
-          MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_OK,
-              "Update successful", uri, null, null, null);
-          return ResponseEntity.ok().body(body);
-        } else {
-          throw new ProductNotFoundException(reference);
-        }
+
+    ResponseEntity<Object> ErrorResult =
+        microserviceControllerService.prepareRequestEntityToPersist(reference, product,
+            MicroserviceControllerService.OPERATION_FULL_UPDATE);
+    if (ErrorResult != null) {
+      return ErrorResult;
+    } else {
+
+      // Search the product to update
+      Product existingProduct = productDao.findByReference(product.getReference());
+
+      URI uri = microserviceControllerService.createTargetURI(product, PATH_PRODUCT);
+      ErrorResult = microserviceControllerService.prepareEntityForUpdate(product, existingProduct,
+          uri, MicroserviceControllerService.OPERATION_FULL_UPDATE);
+      if (ErrorResult != null) {
+        return ErrorResult;
       } else {
-        throw new ProductMandatoryReferenceException();
+
+        // Save the modification
+        productDao.save(product);
+
+        return microserviceControllerService.createResponseBodyForUpdateSuccessful(existingProduct,
+            uri, MicroserviceControllerService.OPERATION_FULL_UPDATE);
       }
-    } catch (Exception ex) {
-      return microserviceControllerService.buildResponseException(uri, ex);
     }
   }
+
+
 
   /**
    * Change partially a product
@@ -306,51 +292,52 @@ public class ProductController {
    * @return a response body with information about the modified product or errors when occurred
    */
   @ApiOperation(value = "Modify some attributes of a product of the inventory")
-  @PatchMapping(value = END_OF_PATH_PRODUCT + "/{reference}")
+  @PatchMapping(value = PATH_PRODUCT + "/{reference}")
   public ResponseEntity<Object> partialUpdateProduct(@RequestBody Product product,
       @PathVariable String reference) {
-    // received path
-    URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("").build().toUri();
-    try {
-      // verification of the request body
-      if (reference != null && !reference.isBlank()) {
-        // the product reference is an uppercase code
-        reference = reference.toUpperCase().trim();
-        uri = microserviceControllerService.formatUriWithCorrectReference(uri, END_OF_PATH_PRODUCT,
-            reference);
-        Product existingProduct = productDao.findByReference(reference);
-        if (existingProduct != null && product != null) {
-          product.setId(existingProduct.getId());
-          product.setReference(reference);
-          LOGGER.info("Partial update of product " + reference + " with values = " + product);
-          if (product.getAvailable() != null) {
-            existingProduct.setAvailable(product.getAvailable());
-          }
-          if (product.getImageURL() != null) {
-            existingProduct.setImageURL(product.getImageURL());
-          }
-          if (product.getName() != null) {
-            existingProduct.setName(product.getName());
-          }
-          if (product.getPrice() != null) {
-            existingProduct.setPrice(product.getPrice());
-          }
-          if (product.getPurchasePrice() != null) {
-            existingProduct.setPurchasePrice(product.getPurchasePrice());
-          }
-          productDao.save(existingProduct);
 
-          MicroserviceResponseBody body = new MicroserviceResponseBody(HttpServletResponse.SC_OK,
-              "Partial update successful", uri, null, null, null);
-          return ResponseEntity.ok().body(body);
-        } else {
-          throw new ProductNotFoundException(reference);
-        }
+    ResponseEntity<Object> ErrorResult =
+        microserviceControllerService.prepareRequestEntityToPersist(reference, product,
+            MicroserviceControllerService.OPERATION_PARTIAL_UPDATE);
+    if (ErrorResult != null) {
+      return ErrorResult;
+    } else {
+
+      // Search the product to update
+      Product existingProduct = productDao.findByReference(product.getReference());
+
+      URI uri = microserviceControllerService.createTargetURI(product, PATH_PRODUCT);
+      ErrorResult = microserviceControllerService.prepareEntityForUpdate(product, existingProduct,
+          uri, MicroserviceControllerService.OPERATION_PARTIAL_UPDATE);
+      if (ErrorResult != null) {
+        return ErrorResult;
       } else {
-        throw new ProductMandatoryReferenceException();
+
+        // Update only modified values
+        if (product.getAvailable() != null) {
+          existingProduct.setAvailable(product.getAvailable());
+        }
+        if (product.getImageURL() != null) {
+          existingProduct.setImageURL(product.getImageURL());
+        }
+        if (product.getName() != null) {
+          existingProduct.setName(product.getName());
+        }
+        if (product.getPrice() != null) {
+          existingProduct.setPrice(product.getPrice());
+        }
+        if (product.getPurchasePrice() != null) {
+          existingProduct.setPurchasePrice(product.getPurchasePrice());
+        }
+
+        // Save the modification
+        productDao.save(existingProduct);
+
+        return microserviceControllerService.createResponseBodyForUpdateSuccessful(existingProduct,
+            uri, MicroserviceControllerService.OPERATION_PARTIAL_UPDATE);
       }
-    } catch (Exception ex) {
-      return microserviceControllerService.buildResponseException(uri, ex);
     }
   }
+
+
 }

@@ -3,13 +3,18 @@ package com.cambyze.training.springboot.microservice.h2.grocery.products;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/*
- * Spring boot application with API REST documentation by Swagger at the url
- * http://localhost:9090/swagger-ui/
+/**
+ * Spring boot application for products management
+ * <p>
+ * with API REST documentation by Swagger
+ * 
+ * @author Thierry Nestelhut
+ * @see <a href="http://localhost:9090/swagger-ui/">API documentation</a>
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
  */
 @SpringBootApplication(
     scanBasePackages = {"com.cambyze.training.springboot.microservice.h2.grocery.products",
-        "com.cambyze.commons.microservices.controller.impl"})
+        "com.cambyze.commons.microservices.web.controller.impl"})
 public class GroceryProductApplication {
 
   public static void main(String[] args) {
