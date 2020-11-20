@@ -52,3 +52,6 @@ build/
 /portal/.mvn/wrapper
 /portal/mvnw
 /portal/mvnw.cmd
+/payments/.mvn/wrapper
+/payments/mvnw
+/payments/mvnw.cmd

@@ -49,12 +49,12 @@ public class PurchaseOrderController {
   /**
    * Get a purchase order by its order reference
    * 
-   * @param reference reference of the purchase order to find *
-   * @return a purchase order with the reference
+   * @param reference reference of the purchase order to find
+   * @return the purchase order
    */
   @ApiOperation(value = "Retrieve a purchase order with its order reference")
   @GetMapping(value = PATH_ORDER + "/{reference}")
-  public PurchaseOrder getOrderbyReference(@PathVariable String reference) throws RuntimeException {
+  public PurchaseOrder getOrderByReference(@PathVariable String reference) throws RuntimeException {
     PurchaseOrder searchOrder = new PurchaseOrder(reference);
     microserviceControllerService.prepareSearchingEntity(searchOrder);
     PurchaseOrder existingOrder = orderDao.findByReference(searchOrder.getReference());
@@ -71,7 +71,7 @@ public class PurchaseOrderController {
    */
   @ApiOperation(value = "Find all the orders, order of a product and/or unpaid orders")
   @GetMapping(value = PATH_ORDER)
-  public List<PurchaseOrder> getorders(
+  public List<PurchaseOrder> getOrders(
       @RequestParam(value = "productReference", required = false) String productReference,
       @RequestParam(value = "paid", required = false) Boolean paid) {
     List<PurchaseOrder> orders;
@@ -151,7 +151,7 @@ public class PurchaseOrderController {
    */
   @ApiOperation(value = "Remove a purchase order")
   @DeleteMapping(value = PATH_ORDER + "/{reference}")
-  public ResponseEntity<Object> deleteProduct(@PathVariable String reference) {
+  public ResponseEntity<Object> deleteOrder(@PathVariable String reference) {
     PurchaseOrder order = new PurchaseOrder(reference);
     ResponseEntity<Object> ErrorResult =
         microserviceControllerService.prepareRequestEntityToPersist(reference, order,
@@ -189,7 +189,7 @@ public class PurchaseOrderController {
    */
   @ApiOperation(value = "Modify all the attributes of a product of the inventory")
   @PutMapping(value = PATH_ORDER + "/{reference}")
-  public ResponseEntity<Object> updateProduct(@RequestBody PurchaseOrder purchaseOrder,
+  public ResponseEntity<Object> updateOrder(@RequestBody PurchaseOrder purchaseOrder,
       @PathVariable String reference) {
 
     ResponseEntity<Object> ErrorResult =
@@ -227,7 +227,7 @@ public class PurchaseOrderController {
    */
   @ApiOperation(value = "Modify some attributes of a product of the inventory")
   @PatchMapping(value = PATH_ORDER + "/{reference}")
-  public ResponseEntity<Object> partialUpdateProduct(@RequestBody PurchaseOrder purchaseOrder,
+  public ResponseEntity<Object> partialUpdateOrder(@RequestBody PurchaseOrder purchaseOrder,
       @PathVariable String reference) {
 
     ResponseEntity<Object> ErrorResult =
