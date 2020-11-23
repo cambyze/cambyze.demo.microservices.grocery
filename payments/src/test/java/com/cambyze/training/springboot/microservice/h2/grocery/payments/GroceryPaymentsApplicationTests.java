@@ -1,4 +1,4 @@
-package com.cambyze.training.springboot.microservice.h2.payments.orders;
+package com.cambyze.training.springboot.microservice.h2.grocery.payments;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
