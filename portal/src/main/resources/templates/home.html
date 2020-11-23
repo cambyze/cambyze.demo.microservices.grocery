@@ -1,22 +1,45 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Grocery portal</title>
+<title>Grocery portal</title>
 
-    <link rel="stylesheet" type="text/css" href="webjars/bootstrap/4.0.0-2/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="webjars/bootstrap/4.5.3/css/bootstrap.min.css" />
 
 </head>
 <body>
 
 
-<div class="container">
+	<div class="container">
 
-    <h1>Grocery portal</h1>
+		<div class="jumbotron p-4 p-md-5 text-white rounded bg-dark">
+			<div class="col-md-6 px-0">
+				<h1 class="display-4 font-italic">Grocery portal</h1>
+				<p class="lead my-3">Big promotions for our special week</p>
+				<p class="lead mb-0">
+					<a href="#" class="text-white font-weight-bold">Enjoy all our products...</a>
+				</p>
+			</div>
+		</div>
 
-</div>
-
-
-<script type="text/javascript" src="webjars/bootstrap/4.0.0-2/js/bootstrap.min.js"></script>
-
+		<p>
+		<p>
+		<div class="row row-cols-1 row-cols-md-4">
+			<div th:each="product : ${products}" class="col mb-4">
+				<div class="card h-100">
+					<img th:src="${product.imageURL}" class="card-img-top">
+					<div class="card-body">
+						<h5 class="card-title" th:text="${product.name}"></h5>
+						<p class="card-text" th:text="${product.textPrice}"></p>
+						<p class="card-text">
+							<small class="text-muted" th:text="${product.textStock}"></small>
+						</p>
+						<a th:href="@{|/order-product/${product.reference}|}"
+							class="btn btn-primary">Buy it</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 </html>
