@@ -15,6 +15,7 @@ import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 import com.cambyze.commons.microservices.model.PersistEntity;
 import com.cambyze.commons.tools.DateTools;
+import com.cambyze.commons.tools.MathTools;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -53,6 +54,14 @@ public class PurchaseOrder extends PersistEntity {
   @Max(value = 10000000)
   private Integer quantity;
 
+  @Min(value = 0)
+  @Max(value = 100000)
+  private Double amount;
+
+  @Min(value = 0)
+  @Max(value = 100000)
+  private Double balance;
+
   private Boolean paid;
 
   public String getEntityName() {
@@ -80,12 +89,25 @@ public class PurchaseOrder extends PersistEntity {
     }
   }
 
+  /*
+   * Format received numbers as amounts
+   */
+  private void formatAmounts() {
+    if (this.amount != null) {
+      this.amount = MathTools.roundWithDecimals(this.amount, NBDECIMALS);
+    }
+    if (this.balance != null) {
+      this.balance = MathTools.roundWithDecimals(this.balance, NBDECIMALS);
+    }
+  }
+
   /**
    * Executed before insertion
    */
   @PrePersist
   private void prePersist() {
     formatReferences();
+    formatAmounts();
     this.orderDate = DateTools.dateWithTimeAtStartOfDay(this.orderDate);
   }
 
@@ -95,6 +117,7 @@ public class PurchaseOrder extends PersistEntity {
   @PreUpdate
   private void preUpate() {
     formatExternalReferences();
+    formatAmounts();
     this.orderDate = DateTools.dateWithTimeAtStartOfDay(this.orderDate);
   }
 
@@ -105,13 +128,15 @@ public class PurchaseOrder extends PersistEntity {
 
   public PurchaseOrder(long id, @NotBlank @Length(min = 5, max = 50) String reference,
       @NotBlank @Length(min = 5, max = 50) String productReference, Date orderDate,
-      @Min(1) @Max(10000000) Integer quantity, Boolean paid) {
-    super();
+      @Min(1) @Max(10000000) Integer quantity, @Min(0) @Max(100000) Double amount,
+      @Min(0) @Max(100000) Double balance, Boolean paid) {
+    super(reference);
     this.id = id;
-    this.reference = reference;
     this.productReference = productReference;
     this.orderDate = orderDate;
     this.quantity = quantity;
+    this.amount = amount;
+    this.balance = balance;
     this.paid = paid;
   }
 
@@ -158,6 +183,22 @@ public class PurchaseOrder extends PersistEntity {
 
   public void setQuantity(Integer quantity) {
     this.quantity = quantity;
+  }
+
+  public Double getAmount() {
+    return amount;
+  }
+
+  public void setAmount(Double amount) {
+    this.amount = amount;
+  }
+
+  public Double getBalance() {
+    return balance;
+  }
+
+  public void setBalance(Double balance) {
+    this.balance = balance;
   }
 
   public Boolean getPaid() {
