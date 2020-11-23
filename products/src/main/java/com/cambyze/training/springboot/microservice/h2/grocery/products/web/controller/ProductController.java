@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.cambyze.commons.microservices.model.PersistEntity;
 import com.cambyze.commons.microservices.web.controller.MicroserviceControllerService;
 import com.cambyze.commons.microservices.web.exceptions.RecordNotFoundException;
 import com.cambyze.commons.tools.MathTools;
+import com.cambyze.training.springboot.microservice.h2.grocery.products.configuration.ApplicationPropertiesConfigurator;
 import com.cambyze.training.springboot.microservice.h2.grocery.products.dao.ProductDao;
 import com.cambyze.training.springboot.microservice.h2.grocery.products.model.Product;
 import io.swagger.annotations.Api;
@@ -46,6 +46,9 @@ public class ProductController {
 
   @Autowired
   private MicroserviceControllerService microserviceControllerService;
+
+  @Autowired
+  private ApplicationPropertiesConfigurator appProperties;
 
   /**
    * Response body for calculated margins
@@ -91,6 +94,13 @@ public class ProductController {
     }
   }
 
+
+  private Double getRoundAmount(Double number) {
+    if (number != null) {
+      return MathTools.roundWithDecimals(number, appProperties.getNumberDecimals());
+    } else
+      return number;
+  }
 
   /**
    * Get product by its product reference
@@ -150,11 +160,9 @@ public class ProductController {
       Double unitMargin = 0.0;
       Double potentialMargin = 0.0;
       if (product.getPrice() != null && product.getPurchasePrice() != null) {
-        unitMargin = MathTools.roundWithDecimals(product.getPrice() - product.getPurchasePrice(),
-            PersistEntity.NBDECIMALS);
+        unitMargin = getRoundAmount(product.getPrice() - product.getPurchasePrice());
         if (product.getAvailable() != null) {
-          potentialMargin = MathTools.roundWithDecimals(unitMargin * product.getAvailable(),
-              PersistEntity.NBDECIMALS);
+          potentialMargin = getRoundAmount(unitMargin * product.getAvailable());
         }
       }
       LOGGER.info("Margins for the product " + product.getReference() + " = " + unitMargin + " , "
@@ -194,6 +202,9 @@ public class ProductController {
       if (ErrorResult != null) {
         return ErrorResult;
       } else {
+
+        product.setPrice(getRoundAmount(product.getPrice()));
+        product.setPurchasePrice(product.getPurchasePrice());
 
         // creation of the product
         Product newProduct = productDao.save(product);
@@ -272,6 +283,8 @@ public class ProductController {
         return ErrorResult;
       } else {
 
+        product.setPrice(getRoundAmount(product.getPrice()));
+        product.setPurchasePrice(product.getPurchasePrice());
         // Save the modification
         productDao.save(product);
 
@@ -323,10 +336,10 @@ public class ProductController {
           existingProduct.setName(product.getName());
         }
         if (product.getPrice() != null) {
-          existingProduct.setPrice(product.getPrice());
+          existingProduct.setPrice(getRoundAmount(product.getPrice()));
         }
         if (product.getPurchasePrice() != null) {
-          existingProduct.setPurchasePrice(product.getPurchasePrice());
+          existingProduct.setPurchasePrice(getRoundAmount(product.getPurchasePrice()));
         }
 
         // Save the modification

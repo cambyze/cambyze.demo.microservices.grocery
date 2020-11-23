@@ -8,13 +8,13 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 import com.cambyze.commons.microservices.model.PersistEntity;
-import com.cambyze.commons.tools.MathTools;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(indexes = {@Index(columnList = "reference", name = "indProductReference", unique = true)})
 public class Product extends PersistEntity {
 
+  @Transient
   private static final String ENTITY_NAME = "product";
 
   @Id
@@ -88,29 +89,14 @@ public class Product extends PersistEntity {
     }
   }
 
-  /*
-   * Format received numbers as amounts
-   */
-  private void formatProductAmounts() {
-    if (this.price != null) {
-      this.price = MathTools.roundWithDecimals(this.price, NBDECIMALS);
-    }
-    if (this.purchasePrice != null) {
-      this.purchasePrice = MathTools.roundWithDecimals(this.purchasePrice, NBDECIMALS);
-    }
-  }
-
 
   @PrePersist
   private void prePersist() {
     formatProductReference();
-    formatProductAmounts();
   }
 
   @PreUpdate
-  private void preUpate() {
-    formatProductAmounts();
-  }
+  private void preUpate() {}
 
   public String getEntityName() {
     return ENTITY_NAME;

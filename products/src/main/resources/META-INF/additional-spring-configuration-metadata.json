@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "cambyze.training.grocery.number-decimals",
+  "type": "int",
+  "description": "number of decimals of amounts"
+}]}
