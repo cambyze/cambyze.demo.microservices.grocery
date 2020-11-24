@@ -2,6 +2,7 @@ package com.cambyze.training.springboot.microservice.h2.grocery.products;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * Spring boot application for products management
@@ -15,6 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(
     scanBasePackages = {"com.cambyze.training.springboot.microservice.h2.grocery.products",
         "com.cambyze.commons.microservices.web.controller.impl"})
+@EnableConfigurationProperties
 public class GroceryProductApplication {
 
   public static void main(String[] args) {

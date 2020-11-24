@@ -55,3 +55,9 @@ build/
 /payments/.mvn/wrapper
 /payments/mvnw
 /payments/mvnw.cmd
+/config-server/mvnw
+/config-server/mvnw.cmd
+/config-server/.mvn/wrapper
+/eureka-server/.mvn/wrapper
+/eureka-server/mvnw
+/eureka-server/mvnw.cmd
