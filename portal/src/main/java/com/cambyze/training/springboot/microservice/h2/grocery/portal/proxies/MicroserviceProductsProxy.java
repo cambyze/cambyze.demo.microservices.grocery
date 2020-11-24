@@ -1,10 +1,10 @@
-package com.cambyze.training.springboot.microservice.h2.groceryPortal.proxies;
+package com.cambyze.training.springboot.microservice.h2.grocery.portal.proxies;
 
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import com.cambyze.training.springboot.microservice.h2.groceryPortal.beans.ProductBean;
+import com.cambyze.training.springboot.microservice.h2.grocery.portal.beans.ProductBean;
 
 /**
  * Proxy to interface with the microservices Products

@@ -1,4 +1,4 @@
-package com.cambyze.training.springboot.microservice.h2.groceryPortal.beans;
+package com.cambyze.training.springboot.microservice.h2.grocery.portal.beans;
 
 /**
  * Product bean to interface with the microservice Products

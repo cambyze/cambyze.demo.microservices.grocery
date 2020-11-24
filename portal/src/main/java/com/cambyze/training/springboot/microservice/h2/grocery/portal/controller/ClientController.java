@@ -1,4 +1,4 @@
-package com.cambyze.training.springboot.microservice.h2.groceryPortal.controller;
+package com.cambyze.training.springboot.microservice.h2.grocery.portal.controller;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.cambyze.training.springboot.microservice.h2.groceryPortal.beans.ProductBean;
-import com.cambyze.training.springboot.microservice.h2.groceryPortal.proxies.MicroserviceProductsProxy;
+import com.cambyze.training.springboot.microservice.h2.grocery.portal.beans.ProductBean;
+import com.cambyze.training.springboot.microservice.h2.grocery.portal.proxies.MicroserviceProductsProxy;
 
 @Controller
 public class ClientController {

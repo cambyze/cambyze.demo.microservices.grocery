@@ -1,8 +1,8 @@
-package com.cambyze.training.springboot.microservice.h2.groceryPortal.configuration;
+package com.cambyze.training.springboot.microservice.h2.grocery.portal.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.cambyze.training.springboot.microservice.h2.groceryPortal.exceptions.MicroservicesExceptionsController;
+import com.cambyze.training.springboot.microservice.h2.grocery.portal.exceptions.MicroservicesExceptionsController;
 
 @Configuration
 public class FeignExceptionConfig {

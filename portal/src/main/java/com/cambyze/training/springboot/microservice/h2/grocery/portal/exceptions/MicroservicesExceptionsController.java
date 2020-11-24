@@ -1,4 +1,4 @@
-package com.cambyze.training.springboot.microservice.h2.groceryPortal.exceptions;
+package com.cambyze.training.springboot.microservice.h2.grocery.portal.exceptions;
 
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
