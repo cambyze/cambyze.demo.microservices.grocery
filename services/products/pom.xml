@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.cambyze.training.springboot.microservice.h2.grocery</groupId>
+    <artifactId>services</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  
+  <artifactId>products</artifactId>
+  <!-- To generate a war instead of a jar -->
+  <!-- <packaging>war</packaging> -->
+  <name>products</name>
+  <description>Grocery products - Training project for Spring Boot server with microservices using H2 db</description>
+
+
+</project>
+
