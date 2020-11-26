@@ -1,5 +1,5 @@
 # Demo project - Grocery inventory and orders management
-Demo project with microservices based on Spring Boot, Spring data JPA, Swagger, Feign, Ribbon and Zuul
+Demo project with microservices based on Spring Boot, Spring data JPA, Spring Security, Swagger, Feign, Ribbon and Zuul
 <p>Portals based on Thymeleaf and Bootstrap
 <ul>
   <li>The portal client allow to order products and to pay it.</li>
