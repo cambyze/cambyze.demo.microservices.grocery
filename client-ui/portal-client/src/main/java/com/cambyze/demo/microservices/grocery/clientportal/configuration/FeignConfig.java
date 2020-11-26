@@ -5,6 +5,17 @@ import org.springframework.context.annotation.Configuration;
 import com.cambyze.demo.microservices.grocery.clientportal.exceptions.MicroservicesExceptionsController;
 import feign.auth.BasicAuthRequestInterceptor;
 
+/**
+ * Feign configuration to
+ * <ul>
+ * <li>customise the Feign exception</li>
+ * <li>force username/passwd in the header</li>
+ * </ul>
+ * 
+ * 
+ * @author Thierry Nestelhut
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
+ */
 @Configuration
 public class FeignConfig {
 

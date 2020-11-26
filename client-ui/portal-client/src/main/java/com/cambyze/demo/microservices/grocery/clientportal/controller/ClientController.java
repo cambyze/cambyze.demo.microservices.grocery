@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.cambyze.demo.microservices.grocery.clientportal.beans.ProductBean;
 import com.cambyze.demo.microservices.grocery.clientportal.proxies.MicroserviceProductsProxy;
 
+/**
+ * Client controller to retrieve the products and format the text to be displayed
+ * 
+ * @author Thierry Nestelhut
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
+ */
 @Controller
 public class ClientController {
 

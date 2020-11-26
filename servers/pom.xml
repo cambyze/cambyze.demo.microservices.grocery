@@ -18,6 +18,7 @@
     <module>config-server</module>
     <module>services-registry-server</module>
     <module>gateway-server</module>
+	<module>tracing-server</module>
   </modules>
 
 

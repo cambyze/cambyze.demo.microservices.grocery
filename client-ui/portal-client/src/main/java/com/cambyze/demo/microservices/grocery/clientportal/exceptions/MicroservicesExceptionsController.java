@@ -7,6 +7,12 @@ import com.cambyze.commons.microservices.web.exceptions.RecordNotFoundException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 
+/**
+ * Customise the default Feign Exception
+ * 
+ * @author Thierry Nestelhut
+ * @see <a href="https://github.com/cambyze">cambyze GitHub</a>
+ */
 public class MicroservicesExceptionsController implements ErrorDecoder {
 
   private static final Logger LOGGER =
