@@ -61,3 +61,7 @@ build/
 /eureka-server/.mvn/wrapper
 /eureka-server/mvnw
 /eureka-server/mvnw.cmd
+/servers/gateway-server/.gitignore
+/servers/gateway-server/.mvn/wrapper
+/servers/gateway-server/mvnw
+/servers/gateway-server/mvnw.cmd

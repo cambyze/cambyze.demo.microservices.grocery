@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cambyze.training.springboot.microservice.h2.grocery</groupId>
+    <groupId>com.cambyze.demo.microservices.grocery</groupId>
     <artifactId>root</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
@@ -12,7 +12,7 @@
   <artifactId>services</artifactId>
   <packaging>pom</packaging>
   <name>services</name>
-  <description>Grocery services - Training project for Spring Boot server with microservices using H2 db</description>
+  <description>Grocery services</description>
 
   <modules>
     <module>products</module>

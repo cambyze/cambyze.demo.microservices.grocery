@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cambyze.training.springboot.microservice.h2.grocery</groupId>
+    <groupId>com.cambyze.demo.microservices.grocery</groupId>
     <artifactId>services</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
@@ -13,7 +13,7 @@
   <!-- To generate a war instead of a jar -->
   <!-- <packaging>war</packaging> -->
   <name>products</name>
-  <description>Grocery products - Training project for Spring Boot server with microservices using H2 db</description>
+  <description>Grocery products</description>
 
 
 </project>

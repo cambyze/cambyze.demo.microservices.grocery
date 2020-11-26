@@ -1,5 +1,5 @@
 {"properties": [{
-  "name": "cambyze.training.grocery.number-decimals",
+  "name": "cambyze.demo.grocery.number-decimals",
   "type": "int",
   "description": "number of decimals of amounts"
 }]}

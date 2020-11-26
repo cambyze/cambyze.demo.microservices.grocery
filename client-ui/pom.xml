@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cambyze.training.springboot.microservice.h2.grocery</groupId>
+    <groupId>com.cambyze.demo.microservices.grocery</groupId>
     <artifactId>root</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
@@ -12,18 +12,13 @@
   <artifactId>client-ui</artifactId>
   <packaging>pom</packaging>
   <name>client-ui</name>
-  <description>Grocery client-ui - Training project for Spring Boot server with microservices using H2 db</description>
+  <description>Grocery client-ui</description>
 
   <modules>
-    <module>portal</module>
+    <module>portal-client</module>
   </modules>
 
   <dependencies>
-
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.webjars</groupId>
@@ -31,10 +26,14 @@
       <version>4.5.3</version>
     </dependency>
 
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
     </dependency>
 
     <dependency>

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cambyze.training.springboot.microservice.h2.grocery</groupId>
+    <groupId>com.cambyze.demo.microservices.grocery</groupId>
     <artifactId>root</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
@@ -12,11 +12,12 @@
   <artifactId>servers</artifactId>
   <packaging>pom</packaging>
   <name>servers</name>
-  <description>Grocery servers - Training project for Spring Boot server with microservices using H2 db</description>
+  <description>Grocery servers</description>
 
   <modules>
     <module>config-server</module>
-    <module>eureka-server</module>
+    <module>services-registry-server</module>
+    <module>gateway-server</module>
   </modules>
 
 
